@@ -61,5 +61,3 @@ RUN set -ex \
 
 
 RUN apt-get install -y awscli
-
-RUN service mysql start
