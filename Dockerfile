@@ -1,4 +1,4 @@
-FROM ubuntu:16.04
+FROM mysql:5.6
 
 RUN apt-get update && apt-get install -y curl xz-utils software-properties-common
 
@@ -19,9 +19,7 @@ RUN set -ex \
     56730D5401028683275BD23C23EFEFE93C4CFFFE \
     77984A986EBC2AA786BC0F66B01FBB92821C587A \
   ; do \
-    gpg --keyserver pgp.mit.edu --recv-keys "$key" || \
-    gpg --keyserver keyserver.pgp.com --recv-keys "$key" || \
-    gpg --keyserver ha.pool.sks-keyservers.net --recv-keys "$key" ; \
+    gpg --keyserver keyserver.ubuntu.com --recv-keys "$key" ; \
   done
 
 
@@ -49,9 +47,7 @@ RUN set -ex \
   && for key in \
     6A010C5166006599AA17F08146C2130DFD2497F5 \
   ; do \
-    gpg --keyserver pgp.mit.edu --recv-keys "$key" || \
-    gpg --keyserver keyserver.pgp.com --recv-keys "$key" || \
-    gpg --keyserver ha.pool.sks-keyservers.net --recv-keys "$key" ; \
+    gpg --keyserver keyserver.ubuntu.com --recv-keys "$key" ; \
   done \
   && curl -fSLO --compressed "https://yarnpkg.com/downloads/$YARN_VERSION/yarn-v$YARN_VERSION.tar.gz" \
   && curl -fSLO --compressed "https://yarnpkg.com/downloads/$YARN_VERSION/yarn-v$YARN_VERSION.tar.gz.asc" \
@@ -62,28 +58,3 @@ RUN set -ex \
   && ln -s /opt/yarn/bin/yarn /usr/local/bin/yarnpkg \
   && rm yarn-v$YARN_VERSION.tar.gz.asc yarn-v$YARN_VERSION.tar.gz \
   && yarn --version
-
-
-
-ENV MYSQL_VERSION 5.6
-RUN add-apt-repository 'deb http://archive.ubuntu.com/ubuntu trusty universe'
-
-RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y mysql-server-"${MYSQL_VERSION}" && rm -rf /var/lib/apt/lists/* \
-    && rm -rf /var/lib/mysql && mkdir -p /var/lib/mysql /var/run/mysqld \
-    && chown -R mysql:mysql /var/lib/mysql /var/run/mysqld \
-# ensure that /var/run/mysqld (used for socket and lock files) is writable regardless of the UID our mysqld instance ends up having at runtime
-    && chmod 777 /var/run/mysqld \
-# comment out a few problematic configuration values
-    && find /etc/mysql/ -name '*.cnf' -print0 \
-        | xargs -0 grep -lZE '^(bind-address|log)' \
-        | xargs -rt -0 sed -Ei 's/^(bind-address|log)/#&/' \
-# don't reverse lookup hostnames, they are usually another container
-    && echo '[mysqld]\nskip-host-cache\nskip-name-resolve' > /etc/mysql/conf.d/docker.cnf \
-    && mysql --version
-
-
-VOLUME /var/lib/mysql
-
-EXPOSE 3306
-CMD [ "node"]
-
