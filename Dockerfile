@@ -61,3 +61,4 @@ RUN set -ex \
 
 
 RUN apt-get install -y awscli
+RUN apt-get install -y git
