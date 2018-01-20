@@ -1,6 +1,6 @@
 FROM mysql:5.6
 
-RUN apt-get update && apt-get install -y curl xz-utils software-properties-common
+RUN apt-get update && apt-get install -y curl xz-utils software-properties-common wget jq
 
 
 RUN groupadd --gid 1000 node \
