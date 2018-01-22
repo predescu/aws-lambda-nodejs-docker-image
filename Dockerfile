@@ -1,5 +1,7 @@
 FROM mysql:5.6
 
+ENV MYSQL_ALLOW_EMPTY_PASSWORD=true
+
 RUN apt-get update && apt-get install -y curl xz-utils software-properties-common wget jq
 
 
