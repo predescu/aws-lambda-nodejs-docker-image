@@ -23,7 +23,7 @@ RUN set -ex \
   done
 
 
-ENV NODE_VERSION 6.10.3
+ENV NODE_VERSION 8.10.0
 RUN dpkgArch="$(dpkg --print-architecture)" \
   && case "${dpkgArch##*-}" in \
     amd64) ARCH='x64';; \
@@ -42,7 +42,7 @@ RUN dpkgArch="$(dpkg --print-architecture)" \
 
 
 
-ENV YARN_VERSION 1.3.2
+ENV YARN_VERSION 1.5.1
 RUN set -ex \
   && for key in \
     6A010C5166006599AA17F08146C2130DFD2497F5 \
