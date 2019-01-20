@@ -60,5 +60,65 @@ RUN set -ex \
   && yarn --version
 
 
+ENV PYTHON_VERSION 2.7.15
+
+RUN set -ex \
+  \
+  && wget -O python.tar.xz "https://www.python.org/ftp/python/${PYTHON_VERSION%%[a-z]*}/Python-$PYTHON_VERSION.tar.xz" \
+  && wget -O python.tar.xz.asc "https://www.python.org/ftp/python/${PYTHON_VERSION%%[a-z]*}/Python-$PYTHON_VERSION.tar.xz.asc" \
+  && export GNUPGHOME="$(mktemp -d)" \
+  && gpg --batch --keyserver ha.pool.sks-keyservers.net --recv-keys "$GPG_KEY" \
+  && gpg --batch --verify python.tar.xz.asc python.tar.xz \
+  && { command -v gpgconf > /dev/null && gpgconf --kill all || :; } \
+  && rm -rf "$GNUPGHOME" python.tar.xz.asc \
+  && mkdir -p /usr/src/python \
+  && tar -xJC /usr/src/python --strip-components=1 -f python.tar.xz \
+  && rm python.tar.xz \
+  \
+  && cd /usr/src/python \
+  && gnuArch="$(dpkg-architecture --query DEB_BUILD_GNU_TYPE)" \
+  && ./configure \
+    --build="$gnuArch" \
+    --enable-shared \
+    --enable-unicode=ucs4 \
+  && make -j "$(nproc)" \
+  && make install \
+  && ldconfig \
+  \
+  && find /usr/local -depth \
+    \( \
+      \( -type d -a \( -name test -o -name tests \) \) \
+      -o \
+      \( -type f -a \( -name '*.pyc' -o -name '*.pyo' \) \) \
+    \) -exec rm -rf '{}' + \
+  && rm -rf /usr/src/python \
+  \
+  && python2 --version
+
+# if this is called "PIP_VERSION", pip explodes with "ValueError: invalid truth value '<VERSION>'"
+ENV PYTHON_PIP_VERSION 18.1
+
+RUN set -ex; \
+  \
+  wget -O get-pip.py 'https://bootstrap.pypa.io/get-pip.py'; \
+  \
+  python get-pip.py \
+    --disable-pip-version-check \
+    --no-cache-dir \
+    "pip==$PYTHON_PIP_VERSION" \
+  ; \
+  pip --version; \
+  \
+  find /usr/local -depth \
+    \( \
+      \( -type d -a \( -name test -o -name tests \) \) \
+      -o \
+      \( -type f -a \( -name '*.pyc' -o -name '*.pyo' \) \) \
+    \) -exec rm -rf '{}' +; \
+  rm -f get-pip.py
+
+# install "virtualenv", since the vast majority of users of this image will want it
+RUN pip install --no-cache-dir virtualenv
+
 RUN apt-get install -y awscli
 RUN apt-get install -y git
