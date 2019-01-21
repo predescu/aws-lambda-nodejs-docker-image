@@ -27,7 +27,7 @@ RUN set -ex \
     114F43EE0176B71C7BC219DD50A3051F888C628D \
     7937DFD2AB06298B2293C3187D33FF9D0246406D \
   ; do \
-    gpg --keyserver keyserver.ubuntu.com --recv-keys "$key" ; \
+    gpg  --batch --keyserver keyserver.ubuntu.com --recv-keys "$key" ; \
   done
 
 
@@ -54,7 +54,7 @@ RUN set -ex \
   && for key in \
     6A010C5166006599AA17F08146C2130DFD2497F5 \
   ; do \
-    gpg --keyserver keyserver.ubuntu.com --recv-keys "$key" ; \
+    gpg  --batch --keyserver keyserver.ubuntu.com --recv-keys "$key" ; \
   done \
   && curl -fSLO --compressed "https://yarnpkg.com/downloads/$YARN_VERSION/yarn-v$YARN_VERSION.tar.gz" \
   && curl -fSLO --compressed "https://yarnpkg.com/downloads/$YARN_VERSION/yarn-v$YARN_VERSION.tar.gz.asc" \
