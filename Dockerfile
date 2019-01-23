@@ -67,7 +67,6 @@ RUN set -ex \
   && yarn --version
 
 
-ENV PYTHON_VERSION 2.7.15
 # ensure local python is preferred over distribution python
 ENV PATH /usr/local/bin:$PATH
 
@@ -83,6 +82,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   && rm -rf /var/lib/apt/lists/*
 
 ENV GPG_KEY C01E1CAD5EA2C4F0B8E3571504C367C218ADD4FF
+ENV PYTHON_VERSION 2.7.15
 
 RUN set -ex \
   \
@@ -119,16 +119,14 @@ RUN set -ex \
 
 # if this is called "PIP_VERSION", pip explodes with "ValueError: invalid truth value '<VERSION>'"
 ENV PYTHON_PIP_VERSION 18.1
+ENV PYTHON_WHELL_VERSION 0.30
+ENV PYTHON_SETUP_TOOLS_VERSION 28.8
 
 RUN set -ex; \
   \
   wget -O get-pip.py 'https://bootstrap.pypa.io/get-pip.py'; \
   \
-  python get-pip.py \
-    --disable-pip-version-check \
-    --no-cache-dir \
-    "pip==$PYTHON_PIP_VERSION" \
-  ; \
+  python get-pip.py pip==${PYTHON_PIP_VERSION} wheel==${PYTHON_WHELL_VERSION} setuptools==${PYTHON_SETUP_TOOLS_VERSION}; \
   pip --version; \
   \
   find /usr/local -depth \
@@ -154,3 +152,7 @@ RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys E1DD270288
     apt-get install -y git; \
     git --version
 
+
+ENV SERVERLESS serverless@1.36.2
+RUN yarn global add $SERVERLESS
+RUN serverless --version
